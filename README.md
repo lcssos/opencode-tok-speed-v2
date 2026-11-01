@@ -50,6 +50,16 @@ opencode plugin list
 
 本插件挂在 `prompt.footer.status` 子槽，位置由布局系统分配，不会像绝对定位那样压住别的元素。
 
+与同类插件（如 `oc-tps`）相比，本插件重点在读数可信度：
+
+| | 本插件 | 常见做法 |
+| --- | --- | --- |
+| token 估算 | 字符数 × 比例，每步用真实 tokens 校正（EMA） | 字节数 ÷ 固定值，永不校正 |
+| 事件重复 | 按 `event.id` 去重 | 无去重，重放会翻倍 |
+| 多代实例 | `globalThis` 单例，新实例接管旧实例 | 各自持有状态，重复计数 |
+| 时间轴 | 一律用服务端 `event.created` | 混用本地钟，批量投递时速率虚高 |
+| TTFT 起点 | `step.started.data.started`（按 step 精确计时） | 会话级起点，会把上一段时间算进去 |
+
 ## 数值口径
 
 ### 速率
@@ -101,6 +111,76 @@ opencode plugin list
 在 OpenCode **v2.2.5** 上开发和验证。依赖 `@opencode/plugin/tui` 的 `context.data.on` 与 `context.ui.slot`，事件名取自 V2 schema：
 
 `session.step.started` / `session.step.ended` / `session.step.failed` / `session.text.delta` / `session.reasoning.delta` / `session.idle`
+
+## 发版
+
+### 一键发版（推荐）
+
+```bash
+npm run release patch    # 0.1.0 → 0.1.1
+npm run release minor    # → 0.2.0
+npm run release major    # → 1.0.0
+npm run release 1.2.3    # 指定版本号
+```
+
+脚本 `scripts/release.sh` 会依次：改版本号 → 提交 → 打 `vX.Y.Z` tag → 推送。
+
+推送 tag 后由 GitHub Actions（`.github/workflows/publish.yml`）自动发布到 npm。
+
+发布前会做三道检查，任何一道不满足都会直接退出：
+
+| 检查 | 说明 |
+| --- | --- |
+| 工作区干净 | 有未提交改动就拒绝，避免把无关改动混进发布提交 |
+| 当前在 `main` | 其他分支拒绝 |
+| 版本号格式 | 只接受 `patch` / `minor` / `major` 或 `X.Y.Z` |
+
+CI 侧还会校验 tag 与 `package.json` 版本一致、npm 上该版本是否已存在、`tui.tsx` 能否被 esbuild 打包。
+
+查看发布进度：
+
+```bash
+gh run watch
+```
+
+### 首次配置：npm Trusted Publisher
+
+CI 使用 **OIDC trusted publishing**，仓库里不保存任何 npm token。需要在 npm 网页上授权一次：
+
+1. 打开 <https://www.npmjs.com/package/opencode-tok-speed-v2/access>
+2. 找到 **Trusted Publisher** 区域，点击 **GitHub Actions**
+3. 填写：
+
+   | 字段 | 值 |
+   | --- | --- |
+   | Organization or user | `lcssos` |
+   | Repository | `opencode-tok-speed-v2` |
+   | Workflow filename | `publish.yml` |
+   | Environment name | 留空 |
+   | Allowed actions | 勾选 **Allow npm publish** |
+
+4. 保存。
+
+注意事项：
+
+- 配置后必须在 **2 天内完成首次发布**，否则配置过期，需要删除重建。
+- `package.json` 的 `repository.url` 必须与 GitHub 仓库完全一致（npm 会比对，不一致会拒发）。
+- 发布成功后 npm 会自动为包生成 provenance 证明（来源：公开仓库 + OIDC）。
+
+### 手动发布（备选）
+
+没有配好 OIDC、或只想临时发一次时：
+
+```bash
+npm publish --access public
+```
+
+npm 现强制发布必须满足其一：
+
+- 账号开启了 2FA，发布时输入 TOTP 6 位码；
+- 使用勾选了 **Bypass two-factor authentication** 的 Granular Access Token。
+
+Token 方式适合非交互环境，注意不要提交进仓库。
 
 ## License
 
