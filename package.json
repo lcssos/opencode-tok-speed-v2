@@ -1,0 +1,39 @@
+{
+  "name": "opencode-tok-speed-v2",
+  "version": "0.1.0",
+  "description": "OpenCode V2 TUI plugin: model output token rate and TTFT in the prompt footer status bar",
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.tsx"
+  },
+  "files": [
+    "tui.tsx",
+    "README.md"
+  ],
+  "dependencies": {
+    "@opencode/plugin": "latest"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.6.6",
+    "@opentui/solid": ">=0.6.6",
+    "solid-js": ">=1.9.0"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tui",
+    "tokens",
+    "tok/s",
+    "tps",
+    "ttft"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lcssos/opencode-tok-speed-v2.git"
+  },
+  "homepage": "https://github.com/lcssos/opencode-tok-speed-v2#readme",
+  "bugs": {
+    "url": "https://github.com/lcssos/opencode-tok-speed-v2/issues"
+  }
+}
