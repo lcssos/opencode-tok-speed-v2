@@ -10,6 +10,13 @@
     "tui.tsx",
     "README.md"
   ],
+  "scripts": {
+    "release": "./scripts/release.sh",
+    "pack:check": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "dependencies": {
     "@opencode/plugin": "latest"
   },
