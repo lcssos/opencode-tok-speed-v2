@@ -1,6 +1,6 @@
 {
   "name": "opencode-tok-speed-v2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenCode V2 TUI plugin: model output token rate and TTFT in the prompt footer status bar",
   "type": "module",
   "exports": {
