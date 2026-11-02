@@ -4,13 +4,16 @@
   "description": "OpenCode V2 TUI plugin: model output token rate and TTFT in the prompt footer status bar",
   "type": "module",
   "exports": {
-    "./tui": "./tui.tsx"
+    "./tui": "./tui.js"
   },
   "files": [
+    "tui.js",
     "tui.tsx",
     "README.md"
   ],
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepack": "node scripts/build.mjs",
     "release": "./scripts/release.sh",
     "pack:check": "npm pack --dry-run"
   },
@@ -35,6 +38,11 @@
     "solid-js": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
+    "babel-preset-solid": "^1.9.16"
   },
   "keywords": [
     "opencode",

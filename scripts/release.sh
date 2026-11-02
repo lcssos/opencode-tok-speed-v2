@@ -27,6 +27,14 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+# 发布入口是预编译的 tui.js，改过 tui.tsx 必须重新构建并提交，否则发出去的还是旧代码
+node scripts/build.mjs
+if [ -n "$(git status --porcelain -- tui.js)" ]; then
+  echo "tui.js 与 tui.tsx 不同步，已重新生成，请提交后再发布：" >&2
+  git status --short -- tui.js >&2
+  exit 1
+fi
+
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$CURRENT_BRANCH" != "main" ]; then
   echo "当前分支是 $CURRENT_BRANCH，请在 main 上发布" >&2
@@ -52,7 +60,7 @@ TAG="v$VERSION"
 
 echo "准备发布 $VERSION (tag: $TAG)"
 
-git add package.json package-lock.json 2>/dev/null || git add package.json
+git add package.json package-lock.json tui.js 2>/dev/null || git add package.json tui.js
 git -c core.hooksPath=/dev/null commit -m "chore: release $TAG"
 git tag -a "$TAG" -m "release $TAG"
 

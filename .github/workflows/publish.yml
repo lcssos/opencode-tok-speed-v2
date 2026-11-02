@@ -44,13 +44,28 @@ jobs:
           fi
           echo "版本 $PKG_VERSION 尚未发布，继续"
 
-      # 本地 tarball 构建校验：确认入口可被解析、能被 bundler 处理
-      - name: 校验插件可构建
+      - name: 安装依赖
+        run: npm ci --no-audit --no-fund
+
+      # 发布入口必须是预编译好的 tui.js：插件装在 node_modules 里时，
+      # OpenCode 不会对 node_modules 内的 .tsx 做 solid JSX 转译。
+      - name: 校验 tui.js 与 tui.tsx 同步
         run: |
-          npm install --no-save --no-audit --no-fund esbuild >/dev/null
-          npx esbuild tui.tsx --bundle --external:* --format=esm \
-            --outfile=/tmp/tui.check.js --loader:.tsx=tsx
-          echo "构建通过，产物大小：$(wc -c </tmp/tui.check.js) 字节"
+          node scripts/build.mjs
+          if [ -n "$(git status --porcelain -- tui.js)" ]; then
+            echo "::error::tui.js 与 tui.tsx 不同步，请在本地执行 npm run build 并把 tui.js 一起提交"
+            git --no-pager diff --stat -- tui.js
+            exit 1
+          fi
+          echo "tui.js 与 tui.tsx 一致"
+
+      - name: 校验入口无残留 JSX
+        run: |
+          if grep -qE '\bjsxDEV?\s*\(' tui.js; then
+            echo "::error::tui.js 里仍有未转译的 JSX，安装后会在 node_modules 内解析失败"
+            exit 1
+          fi
+          echo "入口检查通过，产物大小：$(wc -c <tui.js) 字节"
 
       - name: 打包检查（不发布）
         run: npm pack --dry-run
