@@ -17,10 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # 不要设置 registry-url：它会让 setup-node 往 .npmrc 写入
+      # _authToken=${NODE_AUTH_TOKEN}，而本仓库不保存 npm token。
+      # 带着占位 token 去发布会被 npm 以 404 拒绝，且不会回落到 OIDC。
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
           # 发布构建不要用依赖缓存
           package-manager-cache: false
 
