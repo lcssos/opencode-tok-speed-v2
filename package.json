@@ -9,7 +9,8 @@
   "files": [
     "tui.js",
     "tui.tsx",
-    "README.md"
+    "README.md",
+    "README.zh-CN.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
